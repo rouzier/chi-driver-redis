@@ -3,7 +3,6 @@ use Moose;
 
 use Check::ISA;
 use Redis;
-use Try::Tiny;
 use URI::Escape qw(uri_escape uri_unescape);
 
 extends 'CHI::Driver';
@@ -11,7 +10,9 @@ extends 'CHI::Driver';
 our $VERSION = '0.08';
 
 has 'redis' => (
-    is => 'rw',
+    is   => 'ro',
+    lazy => 1,
+    builder => '_build_redis',
 );
 
 has '_params' => (
@@ -45,8 +46,6 @@ sub _build_redis {
 sub fetch {
     my ($self, $key) = @_;
 
-    return unless $self->_verify_redis_connection;
-
     my $eskey = uri_escape($key);
     my $realkey = $self->prefix . $self->namespace . '||' . $eskey;
     my $val = $self->redis->get($realkey);
@@ -57,8 +56,6 @@ sub fetch_multi_hashref {
     my ($self, $keys) = @_;
 
     return unless scalar(@{ $keys });
-
-    return unless $self->_verify_redis_connection;
 
     my $ns = $self->prefix . $self->namespace;
 
@@ -84,8 +81,6 @@ sub fetch_multi_hashref {
 sub get_keys {
     my ($self) = @_;
 
-    return unless $self->_verify_redis_connection;
-
     my @keys = $self->redis->smembers($self->prefix . $self->namespace);
 
     my @unesckeys = ();
@@ -101,8 +96,6 @@ sub get_keys {
 sub get_namespaces {
     my ($self) = @_;
 
-    return unless $self->_verify_redis_connection;
-
     return $self->redis->smembers($self->prefix . 'chinamespaces');
 }
 
@@ -110,8 +103,6 @@ sub remove {
     my ($self, $key) = @_;
 
     return unless defined($key);
-
-    return unless $self->_verify_redis_connection;
 
     my $ns = $self->prefix . $self->namespace;
 
@@ -123,8 +114,6 @@ sub remove {
 
 sub store {
     my ($self, $key, $data, $expires_in) = @_;
-
-    return unless $self->_verify_redis_connection;
 
     my $ns = $self->prefix . $self->namespace;
 
@@ -143,8 +132,6 @@ sub store {
 sub clear {
     my ($self) = @_;
 
-    return unless $self->_verify_redis_connection;
-
     my $ns = $self->prefix . $self->namespace;
     my @keys = $self->redis->smembers($ns);
 
@@ -152,40 +139,6 @@ sub clear {
         $self->redis->srem($ns, $k);
         $self->redis->del($ns . '||' . $k);
     }
-}
-
-sub _verify_redis_connection {
-    my ($self) = @_;
-
-    my $success = 0;
-    try {
-        if(defined($self->redis)) {
-            if($self->redis->ping) {
-                $success = 1;
-                return;
-            }
-            # Bitch if the ping fails
-            die "Ping failed.";
-        }
-    } catch {
-        warn "Error pinging redis, attempting to reconnect.\n";
-    };
-
-    try {
-        my $redis = $self->_build_redis();
-        if (defined $redis) {
-            # We apparently connected, success!
-            $self->redis($redis);
-            $success = 1;
-        } else {
-            die('Failed to connect to Redis');
-        }
-    } catch {
-        warn "Unable to connect to Redis: $_";
-    };
-
-    # Return the success of failure of the verification
-    return $success;
 }
 
 __PACKAGE__->meta->make_immutable;
