@@ -1,5 +1,5 @@
 package CHI::Driver::Redis;
-use Moose;
+use Moo;
 
 use Check::ISA;
 use Redis;
@@ -141,9 +141,7 @@ sub clear {
     }
 }
 
-__PACKAGE__->meta->make_immutable;
-
-no Moose;
+1;
 
 __END__
 
