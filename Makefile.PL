@@ -14,9 +14,8 @@ build_requires 'Test::Mock::Redis';
 
 requires 'Check::ISA';
 requires 'CHI' => '0.36';
-requires 'Moose';
+requires 'Moo';
 requires 'Redis' => '1.901';
-requires 'Try::Tiny';
 requires 'URI';
 
 WriteAll;
