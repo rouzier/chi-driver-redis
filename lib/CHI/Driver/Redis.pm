@@ -1,7 +1,6 @@
 package CHI::Driver::Redis;
 
 use Moo;
-use Check::ISA;
 use Redis;
 use URI::Escape qw(uri_escape uri_unescape);
 
