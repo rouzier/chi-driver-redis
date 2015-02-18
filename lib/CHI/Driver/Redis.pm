@@ -196,7 +196,11 @@ to undef to disable automatic encoding.
 
 =head1 CONSTRUCTOR OPTIONS
 
-C<server>, C<debug>, and C<password> are passed to C<Redis>.
+C<redis> option for constructed C<Redis> object.
+
+C<redis_options> for hash of optios to C<Redis> constructor
+
+Other options, including C<server>, C<debug>, and C<password> are passed to C<Redis> constructor.
 
 =head1 ATTRIBUTES
 
