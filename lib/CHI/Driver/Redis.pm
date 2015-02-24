@@ -6,7 +6,7 @@ use URI::Escape qw(uri_escape uri_unescape);
 
 extends 'CHI::Driver';
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 has 'redis' => (
     is   => 'ro',

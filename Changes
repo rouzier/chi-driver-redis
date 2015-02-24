@@ -1,5 +1,10 @@
 Revision history for CHI-Driver-Redis
 
+0.09 February 24, 2015
+  * Change how parameters are stored and passed to the Redis constructor
+  * Migrate to Moo
+  * Jettison _verify_redis_connection
+
 0.08 August 13, 2014
   * Use Test::Mock::Redis for tests when CHI_REDIS_SERVER not set
 
