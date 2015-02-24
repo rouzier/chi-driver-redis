@@ -1,7 +1,6 @@
 package CHI::Driver::Redis;
-use Moo;
 
-use Check::ISA;
+use Moo;
 use Redis;
 use URI::Escape qw(uri_escape uri_unescape);
 
@@ -15,8 +14,14 @@ has 'redis' => (
     builder => '_build_redis',
 );
 
-has '_params' => (
-    is => 'rw'
+has 'redis_options' => (
+    is => 'rw',
+    default => sub { {} },
+);
+
+has 'redis_class' => (
+    is => 'ro',
+    default => 'Redis',
 );
 
 has 'prefix'=> (
@@ -26,21 +31,23 @@ has 'prefix'=> (
 
 sub BUILD {
     my ($self, $params) = @_;
-    $self->_params($params);
+    foreach my $param (qw/redis redis_class redis_options prefix/) {
+        if (exists $params->{$param}) {
+            delete $params->{$param};
+        }
+    }
+    my %options = (
+        server => '127.0.0.1:6379',
+        encoding => undef,
+        %{ $self->redis_options() },
+        %{ $self->non_common_constructor_params($params) },
+    );
+    $self->redis_options(\%options);
 }
 
 sub _build_redis {
     my ($self) = @_;
-
-    my $params = $self->_params;
-
-    my $redis_class = $params->{redis_class} || 'Redis';
-    return $redis_class->new(
-        server => $params->{server} || '127.0.0.1:6379',
-        debug => $params->{debug} || 0,
-        encoding => undef,
-        (defined $params->{password} ? ( password => $params->{password} ) : ()),
-    );
+    return $self->redis_class()->new(%{ $self->redis_options() });
 }
 
 sub fetch {
@@ -189,7 +196,11 @@ to undef to disable automatic encoding.
 
 =head1 CONSTRUCTOR OPTIONS
 
-C<server>, C<debug>, and C<password> are passed to C<Redis>.
+C<redis> option for constructed C<Redis> object.
+
+C<redis_options> for hash of optios to C<Redis> constructor
+
+Other options, including C<server>, C<debug>, and C<password> are passed to C<Redis> constructor.
 
 =head1 ATTRIBUTES
 

@@ -12,7 +12,6 @@ build_requires 'Test::Class';
 build_requires 'Test::More';
 build_requires 'Test::Mock::Redis';
 
-requires 'Check::ISA';
 requires 'CHI' => '0.36';
 requires 'Moo';
 requires 'Redis' => '1.901';

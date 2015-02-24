@@ -31,4 +31,22 @@ sub clear_redis : Test(setup) {
     $cache->redis->flushall;
 }
 
+sub test_redis_object : Tests(1) {
+    my $self  = shift;
+    my $cache = $self->new_cache(redis => Test::Mock::Redis->new());
+    $cache->clear();
+}
+
+sub test_redis_options : Tests(1) {
+    my $self  = shift;
+    my $cache = $self->new_cache(redis_options => { reconnect => 2 });
+    $cache->clear();
+}
+
+sub test_extra_options : Tests(1) {
+    my $self  = shift;
+    my $cache = $self->new_cache(reconnect => 2);
+    $cache->clear();
+}
+
 1;
