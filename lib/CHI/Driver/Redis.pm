@@ -72,12 +72,8 @@ sub fetch_multi_hashref {
 
     my @vals = $self->redis->mget(@keys);
 
-    my $count = 0;
     my %resp;
-    foreach my $k (@$keys) {
-        $resp{$k} = $vals[$count];
-        $count++;
-    }
+    @resp{@$keys} = @vals;
 
     return \%resp;
 }
