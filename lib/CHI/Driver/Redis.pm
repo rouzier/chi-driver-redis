@@ -102,9 +102,10 @@ sub remove {
     return unless defined($key);
 
     my $ns = $self->prefix . $self->namespace;
-
-    $self->redis->srem($ns, $key);
-    $self->redis->del($ns . '||' . $key);
+    my $redis = $self->redis;
+    $redis->srem($ns, $key, sub {});
+    $redis->del($ns . '||' . $key, sub {});
+    $redis->wait_all_responses();
 }
 
 sub store {
@@ -114,25 +115,29 @@ sub store {
 
     my $realkey = $ns . '||' . $key;
 
-    $self->redis->sadd($self->prefix . 'chinamespaces', $self->namespace);
-    $self->redis->sadd($ns, $key);
-    $self->redis->set($realkey, $data);
+    my $redis = $self->redis;
+    $redis->sadd($self->prefix . 'chinamespaces', $self->namespace, sub {});
+    $redis->sadd($ns, $key, sub {});
+    $redis->set($realkey, $data, sub {});
 
     if (defined($expires_in)) {
-        $self->redis->expire($realkey, $expires_in);
+        $redis->expire($realkey, $expires_in, sub {});
     }
+    $redis->wait_all_responses();
 }
 
 sub clear {
     my ($self) = @_;
+    my $redis = $self->redis;
 
     my $ns = $self->prefix . $self->namespace;
-    my @keys = $self->redis->smembers($ns);
+    my @keys = $redis->smembers($ns);
 
     foreach my $k (@keys) {
-        $self->redis->srem($ns, $k);
-        $self->redis->del($ns . '||' . $k);
+        $redis->srem($ns, $k, sub {});
+        $redis->del($ns . '||' . $k, sub {});
     }
+    $redis->wait_all_responses();
 }
 
 1;
