@@ -2,7 +2,6 @@ package CHI::Driver::Redis;
 
 use Moo;
 use Redis;
-use URI::Escape qw(uri_escape uri_unescape);
 
 extends 'CHI::Driver';
 
@@ -53,8 +52,7 @@ sub _build_redis {
 sub fetch {
     my ($self, $key) = @_;
 
-    my $eskey = uri_escape($key);
-    my $realkey = $self->prefix . $self->namespace . '||' . $eskey;
+    my $realkey = $self->prefix . $self->namespace . '||' . $key;
     my $val = $self->redis->get($realkey);
     return $val;
 }
@@ -68,8 +66,7 @@ sub fetch_multi_hashref {
 
     my @keys;
     foreach my $k (@$keys) {
-        my $esk = uri_escape($k);
-        my $key = $ns . '||' . $esk;
+        my $key = $ns . '||' . $k;
         push @keys, $key;
     }
 
@@ -90,14 +87,7 @@ sub get_keys {
 
     my @keys = $self->redis->smembers($self->prefix . $self->namespace);
 
-    my @unesckeys = ();
-
-    foreach my $k (@keys) {
-        # Getting an empty key here for some reason...
-        next unless defined $k;
-        push(@unesckeys, uri_unescape($k));
-    }
-    return @unesckeys;
+    return grep { defined $_ } @keys;
 }
 
 sub get_namespaces {
@@ -113,10 +103,8 @@ sub remove {
 
     my $ns = $self->prefix . $self->namespace;
 
-    my $skey = uri_escape($key);
-
-    $self->redis->srem($ns, $skey);
-    $self->redis->del($ns . '||' . $skey);
+    $self->redis->srem($ns, $key);
+    $self->redis->del($ns . '||' . $key);
 }
 
 sub store {
@@ -124,11 +112,10 @@ sub store {
 
     my $ns = $self->prefix . $self->namespace;
 
-    my $skey = uri_escape($key);
-    my $realkey = $ns . '||' . $skey;
+    my $realkey = $ns . '||' . $key;
 
     $self->redis->sadd($self->prefix . 'chinamespaces', $self->namespace);
-    $self->redis->sadd($ns, $skey);
+    $self->redis->sadd($ns, $key);
     $self->redis->set($realkey, $data);
 
     if (defined($expires_in)) {
