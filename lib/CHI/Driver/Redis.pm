@@ -172,7 +172,7 @@ CHI::Driver::Redis - Redis driver for CHI
 A CHI driver that uses C<Redis> to store the data.  Care has been taken to
 not have this module fail in fiery ways if the cache is unavailable.  It is my
 hope that if it is failing and the cache is not required for your work, you
-can ignore it's warnings.
+can ignore its warnings.
 
 =head1 TECHNICAL DETAILS
 
@@ -192,15 +192,22 @@ This CHI driver uses Redis.pm.  Redis.pm by default automatically
 encodes values to UTF-8.  This driver sets the Redis encoding option
 to undef to disable automatic encoding.
 
-=back
-
 =head1 CONSTRUCTOR OPTIONS
 
-C<redis> option for constructed C<Redis> object.
+=over 4
 
-C<redis_options> for hash of optios to C<Redis> constructor
+=item C<redis>
 
-Other options, including C<server>, C<debug>, and C<password> are passed to C<Redis> constructor.
+option for the constructed C<Redis> object
+
+=item C<redis_options>
+
+for hash of options to the C<Redis> constructor
+
+=back
+
+Other options, including C<server>, C<debug>, and C<password> are passed to
+the C<Redis> constructor.
 
 =head1 ATTRIBUTES
 
