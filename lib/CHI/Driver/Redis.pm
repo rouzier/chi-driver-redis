@@ -192,8 +192,6 @@ This CHI driver uses Redis.pm.  Redis.pm by default automatically
 encodes values to UTF-8.  This driver sets the Redis encoding option
 to undef to disable automatic encoding.
 
-=back
-
 =head1 CONSTRUCTOR OPTIONS
 
 C<redis> option for constructed C<Redis> object.
